@@ -17,7 +17,10 @@ Exercicio 1 Ingrid:
 
 
 
-https://github.com/user-attachments/assets/f12a061f-1aa2-4637-9a6e-963d7aa04206
+
+
+https://github.com/user-attachments/assets/c2e6bf35-8c34-4ead-bebd-6eb302b51fee
+
 
 
 
