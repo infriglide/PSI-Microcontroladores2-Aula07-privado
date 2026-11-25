@@ -115,6 +115,7 @@ def main():
     for placa, porta in (("v", args.veic), ("p", args.ped)):
         if porta:
             s = serial.Serial(porta, 115200, timeout=0.1)
+            s.reset_input_buffer()   # descarta sobras de capturas anteriores
             fontes.append(s)
             enviar[placa] = lambda letra, s=s: s.write(letra.encode())
 

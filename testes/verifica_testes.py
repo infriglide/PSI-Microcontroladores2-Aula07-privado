@@ -388,6 +388,10 @@ def ts_b2_botao_ja_verde(ev):
         if not any(0 <= t - b["pc"] <= LAT for t in ignorados):
             erros.append(f"pedido nao foi ignorado (t={b['pc']} ms)")
         prox_verde = [i for i in intervalos(ev, "VEIC", "VERDE") if i["on_pc"] > b["pc"]]
+        # se outro aperto cortou esse verde, a duracao dele nao vale para este caso
+        if prox_verde and any(prox_verde[0]["on_pc"] <= o["pc"] <= prox_verde[0]["off_pc"]
+                              for o in botoes(ev)):
+            prox_verde = prox_verde[1:]
         if prox_verde and abs(prox_verde[0]["dur"] - T_VERDE) > TOL:
             erros.append(f"verde seguinte mudou para {prox_verde[0]['dur']} ms")
     if erros:
