@@ -235,6 +235,7 @@ A simulação não substitui o teste na placa, porque não tem GPIO real nem o e
 
 | Erro | Teste que acusou | Causa | Correção |
 |---|---|---|---|
+| Nos testes de sistema, linhas do log saíam misturadas (`10171;888227;PED;PEDIDO_OFF`) ou sumiam, e TI-2, TI-3, TS-B1 e TS-B2 deram FALHOU | `evidencias/placa/TS_botao_falha_log_embaralhado.txt` | Duas threads da placa de pedestres chamavam `printk` no mesmo milissegundo e as letras das linhas se misturavam; o log também trazia sobras da captura anterior | `CONFIG_PRINTK_SYNC=y` nas duas placas (uma linha por vez) e `reset_input_buffer()` no `captura.py`; os semáforos em si funcionaram, como mostra o vídeo |
 | Pedestre sozinho piscava o vermelho (1 s / 1 s) em vez de ficar vermelho fixo | TU-P3 (`evidencias/placa/TU_pedestres_sem_mestre_falha_pulldown.txt`) | Com o fio NOITE solto, o pino A1 era lido como 1 mesmo com o pull-down interno, e a placa entrava no modo noturno sozinha | Fios passaram a ser ativos em nível baixo, com pull-up nas entradas (`GPIO_ACTIVE_LOW`); a simulação foi refeita e passou |
 
 ## Resultados
@@ -248,21 +249,21 @@ A simulação não substitui o teste na placa, porque não tem GPIO real nem o e
 | TU-P1 | PASSOU (verde 4000–4001, vermelho 3999–4000 ms) | PASSOU | verde 3996–4000, vermelho 3997–3999 ms | `evidencias/placa/TU_pedestres.txt` + `TU_P1_pedestres.mp4` |
 | TU-P2 | PASSOU | PASSOU | 13 acendimentos, nunca dois juntos | `evidencias/placa/TU_pedestres.txt` |
 | TU-P3 | PASSOU | PASSOU | 20 s, nenhum verde | `evidencias/placa/TU_pedestres_sem_mestre.txt` |
-| TI-1 | PASSOU (menor folga 99 ms) | | | `evidencias/placa/TI_dia.txt` |
-| TI-2 | PASSOU (atraso máx. 13 ms) | | | `evidencias/placa/TI_dia.txt` |
-| TI-3 | PASSOU (3788–3806 ms) | | | `evidencias/placa/TI_dia.txt` |
-| TI-4 | (visual) | | | vídeo |
-| TS-N1 | PASSOU | PASSOU (só pedestres, modo autônomo) | vermelho: 3 piscadas de 1 s / 1 s | `evidencias/placa/TS_noturno.txt` |
-| TS-N2 | PASSOU | | | `evidencias/placa/TS_noturno.txt` |
-| TS-N3 | (visual) | | | vídeo |
-| TS-B1 | PASSOU (espera do pedestre 696–1122 ms) | | | `evidencias/placa/TS_botao.txt` |
-| TS-B2 | PASSOU | | | `evidencias/placa/TS_botao.txt` |
-| TS-B3 | PASSOU | | | `evidencias/placa/TS_noturno.txt` |
-| TS-B4 | (placa) | | | log + vídeo |
-| TA-1 | (placa) | | | vídeo |
-| TA-2 | – | | | esta tabela |
+| TI-1 | PASSOU (menor folga 99 ms) | PASSOU | menor folga 103–105 ms, nunca conflito | `evidencias/placa/TI_dia.txt` + `TI_duas_placas.mp4` |
+| TI-2 | PASSOU (atraso máx. 13 ms) | PASSOU | atraso médio 1–2 ms, máx. 4 ms | `evidencias/placa/TI_dia.txt` |
+| TI-3 | PASSOU (3788–3806 ms) | PASSOU | 3804–3807 ms | `evidencias/placa/TI_dia.txt` |
+| TI-4 | (visual) | PASSOU | fio branco (A0) puxado durante o verde: pedestre foi para o vermelho e ficou lá; religado, o ciclo voltou ao normal | `evidencias/placa/TI_4_fio_solto.mp4` |
+| TS-N1 | PASSOU | PASSOU | 9 piscadas de 1 s nas duas placas | `evidencias/placa/TS_noturno.txt` + `TS_noturno.mp4` |
+| TS-N2 | PASSOU | PASSOU | volta ao dia pelo vermelho | `evidencias/placa/TS_noturno.txt` |
+| TS-N3 | (visual) | não executado | os 4 jumpers foram usados nos fios; modo noturno acionado pela serial (`n`/`d`), que chama a mesma função `muda_modo()` | – |
+| TS-B1 | PASSOU (espera do pedestre 696–1122 ms) | PASSOU | pedestre abriu em 138 ms (aperto no amarelo); corte do verde visto no vídeo e no log `TS_botao_falha_log_embaralhado.txt` | `evidencias/placa/TS_botao.txt` + `TS_botao.mp4` |
+| TS-B2 | PASSOU | PASSOU | 2 apertos ignorados, verde seguinte com 3 s | `evidencias/placa/TS_botao.txt` |
+| TS-B3 | PASSOU | PASSOU | aperto no modo noturno sem efeito | `evidencias/placa/TS_noturno.txt` |
+| TS-B4 | (placa) | não executado | sem jumper extra para o botão; botão acionado pela serial (`b`), que chama a mesma função `pede_travessia()` | – |
+| TA-1 | (placa) | PASSOU | os vídeos mostram R1 a R6 nas duas placas, sem conflito de LEDs; o botão e o modo noturno foram acionados pela serial | `TI_duas_placas.mp4`, `TS_noturno.mp4`, `TS_botao.mp4`, `TI_4_fio_solto.mp4` |
+| TA-2 | – | PASSOU | todos os testes automáticos passaram na placa; TS-N3 e TS-B4 (botões físicos) não executados por falta de jumpers | esta tabela |
 
-Os logs e as tabelas completas estão em `evidencias/simulacao/` e `evidencias/placa/`. Na placa, o TS-N1 foi feito primeiro só com a placa de pedestres; a versão com as duas placas entra junto com os testes de integração.
+Os logs e as tabelas completas estão em `evidencias/simulacao/` e `evidencias/placa/`. O TS-N1 foi feito primeiro só com a placa de pedestres (modo autônomo) e depois com as duas placas ligadas.
 
 ## Avaliação por pares
 
