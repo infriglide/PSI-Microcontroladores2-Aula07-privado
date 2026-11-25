@@ -245,7 +245,7 @@ A simulação não substitui o teste na placa, porque não tem GPIO real nem o e
 | TU-V2 | PASSOU (verde 3003–3008, amarelo 1001–1004, vermelho 4002–4010 ms) | PASSOU | verde 3001–3002, amarelo 1002, vermelho 4016–4017 ms | `evidencias/placa/TU_veiculos.txt` |
 | TU-V3 | PASSOU | PASSOU | 15 acendimentos, nunca dois juntos | `evidencias/placa/TU_veiculos.txt` |
 | TU-V4 | (visual) | PASSOU | ciclo vermelho → verde → amarelo no vídeo | `evidencias/placa/TU_V4_veiculos.mp4` |
-| TU-P1 | PASSOU (verde 4000–4001, vermelho 3999–4000 ms) | PASSOU | verde 3996–4000, vermelho 3997–3999 ms | `evidencias/placa/TU_pedestres.txt` |
+| TU-P1 | PASSOU (verde 4000–4001, vermelho 3999–4000 ms) | PASSOU | verde 3996–4000, vermelho 3997–3999 ms | `evidencias/placa/TU_pedestres.txt` + `TU_P1_pedestres.mp4` |
 | TU-P2 | PASSOU | PASSOU | 13 acendimentos, nunca dois juntos | `evidencias/placa/TU_pedestres.txt` |
 | TU-P3 | PASSOU | PASSOU | 20 s, nenhum verde | `evidencias/placa/TU_pedestres_sem_mestre.txt` |
 | TI-1 | PASSOU (menor folga 99 ms) | | | `evidencias/placa/TI_dia.txt` |
