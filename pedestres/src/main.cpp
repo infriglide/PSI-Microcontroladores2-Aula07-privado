@@ -230,10 +230,13 @@ int main(void)
     led_verde.iniciar();
     led_vermelho.iniciar();
 
-    /* pull-down: se o fio soltar, le 0 = pedestre vermelho, modo dia */
-    gpio_pin_configure(porta_b, PINO_LIBERA_PED, GPIO_INPUT | GPIO_PULL_DOWN);
-    gpio_pin_configure(porta_b, PINO_NOITE, GPIO_INPUT | GPIO_PULL_DOWN);
-    gpio_pin_configure(porta_b, PINO_PEDIDO, GPIO_OUTPUT_INACTIVE);
+    /* Fios ativos em nivel baixo com pull-up: se o fio soltar, o pino fica
+     * em 1 (3,3 V), que vale "desligado": pedestre vermelho, modo dia.
+     * (Com pull-down, o A1 solto era lido como 1 na placa e o modo
+     * noturno ligava sozinho.) */
+    gpio_pin_configure(porta_b, PINO_LIBERA_PED, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_LOW);
+    gpio_pin_configure(porta_b, PINO_NOITE, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_LOW);
+    gpio_pin_configure(porta_b, PINO_PEDIDO, GPIO_OUTPUT_INACTIVE | GPIO_ACTIVE_LOW);
     gpio_pin_configure(porta_d, PINO_BOTAO, GPIO_INPUT | GPIO_PULL_UP);
 
     printk("%u;PED;INICIO\n", k_uptime_get_32());

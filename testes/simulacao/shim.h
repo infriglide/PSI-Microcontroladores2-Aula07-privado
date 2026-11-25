@@ -51,7 +51,7 @@ static int rede(const device *d, int pin) {
 static int pull_local[64];
 inline int gpio_pin_configure(const device *d, int pin, int f) {
     int r = rede(d,pin); if (r<0) return 0;
-    pull_local[r] = (f & GPIO_PULL_UP) ? 1 : 0;
+    pull_local[r] = ((f & GPIO_PULL_UP) ? 1 : 0) ^ ((f & GPIO_ACTIVE_LOW) ? 1 : 0);
     if (f & GPIO_OUTPUT_INACTIVE) redes()[r] = 0;
     return 0;
 }

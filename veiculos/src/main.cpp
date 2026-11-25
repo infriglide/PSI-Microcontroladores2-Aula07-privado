@@ -277,9 +277,11 @@ int main(void)
     led_vermelho.iniciar();
     led_amarelo.iniciar();
 
-    gpio_pin_configure(porta_b, PINO_LIBERA_PED, GPIO_OUTPUT_INACTIVE);
-    gpio_pin_configure(porta_b, PINO_NOITE, GPIO_OUTPUT_INACTIVE);
-    gpio_pin_configure(porta_b, PINO_PEDIDO, GPIO_INPUT | GPIO_PULL_DOWN);
+    /* Fios entre as placas ativos em nivel baixo: 1 logico = 0 V no fio.
+     * Fio solto fica em 1 (pull-up) = sinal desligado = estado seguro. */
+    gpio_pin_configure(porta_b, PINO_LIBERA_PED, GPIO_OUTPUT_INACTIVE | GPIO_ACTIVE_LOW);
+    gpio_pin_configure(porta_b, PINO_NOITE, GPIO_OUTPUT_INACTIVE | GPIO_ACTIVE_LOW);
+    gpio_pin_configure(porta_b, PINO_PEDIDO, GPIO_INPUT | GPIO_PULL_UP | GPIO_ACTIVE_LOW);
     gpio_pin_configure(porta_d, PINO_BOTAO_NOITE, GPIO_INPUT | GPIO_PULL_UP);
 
     printk("%u;VEIC;INICIO\n", k_uptime_get_32());
