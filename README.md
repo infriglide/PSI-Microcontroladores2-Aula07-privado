@@ -91,12 +91,12 @@ Ligações entre as placas, todas no header analógico:
 
 | Sinal | Placa de veículos | Placa de pedestres | Sentido |
 |---|---|---|---|
-| LIBERA_PED | A0 (PTB0), saída | A0 (PTB0), entrada com pull-down | veículos → pedestres |
-| NOITE | A1 (PTB1), saída | A1 (PTB1), entrada com pull-down | veículos → pedestres |
-| PEDIDO | A3 (PTB3), entrada com pull-down | A3 (PTB3), saída | pedestres → veículos |
+| LIBERA_PED | A0 (PTB0), saída | A0 (PTB0), entrada com pull-up | veículos → pedestres |
+| NOITE | A1 (PTB1), saída | A1 (PTB1), entrada com pull-up | veículos → pedestres |
+| PEDIDO | A3 (PTB3), entrada com pull-up | A3 (PTB3), saída | pedestres → veículos |
 | GND | GND | GND | comum |
 
-O A2 (PTB2) ficou de fora porque o devicetree da placa reserva esse pino para o ADC. As entradas usam pull-down, então um fio solto é lido como 0: pedestre vermelho e modo dia. Os botões usam o pull-up interno e não precisam de resistor. Um jumper encostado no GND já funciona como botão.
+O A2 (PTB2) ficou de fora porque o devicetree da placa reserva esse pino para o ADC. Os três fios são **ativos em nível baixo**: o sinal vale quando o fio está em 0 V. As entradas usam o pull-up interno, então um fio solto fica em 3,3 V e é lido como "desligado": pedestre vermelho e modo dia. A primeira versão usava pull-down e sinal ativo em nível alto, mas na placa o A1 solto era lido como 1 (veja "Erros encontrados na placa"). Os botões usam o pull-up interno e não precisam de resistor. Um jumper encostado no GND já funciona como botão.
 
 ## Como compilar e gravar
 
@@ -231,22 +231,28 @@ Antes de gravar, rodamos o mesmo `main.cpp` das duas placas no computador. O arq
 
 A simulação não substitui o teste na placa, porque não tem GPIO real nem o escalonador do Zephyr. Ela serve para achar erros de lógica mais cedo.
 
+## Erros encontrados na placa
+
+| Erro | Teste que acusou | Causa | Correção |
+|---|---|---|---|
+| Pedestre sozinho piscava o vermelho (1 s / 1 s) em vez de ficar vermelho fixo | TU-P3 (`evidencias/placa/TU_pedestres_sem_mestre_falha_pulldown.txt`) | Com o fio NOITE solto, o pino A1 era lido como 1 mesmo com o pull-down interno, e a placa entrava no modo noturno sozinha | Fios passaram a ser ativos em nível baixo, com pull-up nas entradas (`GPIO_ACTIVE_LOW`); a simulação foi refeita e passou |
+
 ## Resultados
 
 | ID | Simulação | Placa | Medido na placa | Evidência |
 |---|---|---|---|---|
-| TU-V1 | PASSOU | | | `evidencias/placa/TU_veiculos.txt` |
-| TU-V2 | PASSOU (verde 3003–3008, amarelo 1001–1004, vermelho 4002–4010 ms) | | | `evidencias/placa/TU_veiculos.txt` |
-| TU-V3 | PASSOU | | | `evidencias/placa/TU_veiculos.txt` |
-| TU-V4 | (visual) | | | vídeo |
-| TU-P1 | PASSOU (verde 4000–4001, vermelho 3999–4000 ms) | | | `evidencias/placa/TU_pedestres.txt` |
-| TU-P2 | PASSOU | | | `evidencias/placa/TU_pedestres.txt` |
-| TU-P3 | PASSOU | | | `evidencias/placa/TU_pedestres_sem_mestre.txt` |
+| TU-V1 | PASSOU | PASSOU | 14 transições corretas | `evidencias/placa/TU_veiculos.txt` |
+| TU-V2 | PASSOU (verde 3003–3008, amarelo 1001–1004, vermelho 4002–4010 ms) | PASSOU | verde 3001–3002, amarelo 1002, vermelho 4016–4017 ms | `evidencias/placa/TU_veiculos.txt` |
+| TU-V3 | PASSOU | PASSOU | 15 acendimentos, nunca dois juntos | `evidencias/placa/TU_veiculos.txt` |
+| TU-V4 | (visual) | PASSOU | ciclo vermelho → verde → amarelo no vídeo | `evidencias/placa/TU_V4_veiculos.mp4` |
+| TU-P1 | PASSOU (verde 4000–4001, vermelho 3999–4000 ms) | PASSOU | verde 3996–4000, vermelho 3997–3999 ms | `evidencias/placa/TU_pedestres.txt` |
+| TU-P2 | PASSOU | PASSOU | 13 acendimentos, nunca dois juntos | `evidencias/placa/TU_pedestres.txt` |
+| TU-P3 | PASSOU | PASSOU | 20 s, nenhum verde | `evidencias/placa/TU_pedestres_sem_mestre.txt` |
 | TI-1 | PASSOU (menor folga 99 ms) | | | `evidencias/placa/TI_dia.txt` |
 | TI-2 | PASSOU (atraso máx. 13 ms) | | | `evidencias/placa/TI_dia.txt` |
 | TI-3 | PASSOU (3788–3806 ms) | | | `evidencias/placa/TI_dia.txt` |
 | TI-4 | (visual) | | | vídeo |
-| TS-N1 | PASSOU | | | `evidencias/placa/TS_noturno.txt` |
+| TS-N1 | PASSOU | PASSOU (só pedestres, modo autônomo) | vermelho: 3 piscadas de 1 s / 1 s | `evidencias/placa/TS_noturno.txt` |
 | TS-N2 | PASSOU | | | `evidencias/placa/TS_noturno.txt` |
 | TS-N3 | (visual) | | | vídeo |
 | TS-B1 | PASSOU (espera do pedestre 696–1122 ms) | | | `evidencias/placa/TS_botao.txt` |
@@ -256,7 +262,7 @@ A simulação não substitui o teste na placa, porque não tem GPIO real nem o e
 | TA-1 | (placa) | | | vídeo |
 | TA-2 | – | | | esta tabela |
 
-Os logs e as tabelas completas da simulação estão em `evidencias/simulacao/`.
+Os logs e as tabelas completas estão em `evidencias/simulacao/` e `evidencias/placa/`. Na placa, o TS-N1 foi feito primeiro só com a placa de pedestres; a versão com as duas placas entra junto com os testes de integração.
 
 ## Avaliação por pares
 
